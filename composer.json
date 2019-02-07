@@ -1,0 +1,21 @@
+{
+    "name": "kanian/containerx",
+    "description": "A simple PHP DI container",
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Patrick Assoa",
+            "email": "kanian77@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "kanian\\containers\\": "src/"
+        }
+    }
+}
