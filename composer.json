@@ -15,7 +15,12 @@
     "require": {},
     "autoload": {
         "psr-4": {
-            "Kanian\\Containerx\\": "src/"
+            "Kanian\\ContainerX\\": ["src/"]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Kanian\\ContainerX\\Tests\\": ["tests/"]
         }
     }
 }
