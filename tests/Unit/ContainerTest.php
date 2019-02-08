@@ -56,11 +56,4 @@ class ContainerTest extends TestCase
         $this->expectException(DependencyIsNotInstantiableException::class);
         $this->container->getConstructor('CANT_BE_INSTANTIATE');
     }
-    /*public function testSetObjectCanBeRetrieved(){
-$this->container->set('dummyDependency', $this->dummyDependency);
-$this->assertEquals(
-$this->container->get('dummyDependency'),
-$this->dummyDependency
-);
-}*/
 }
