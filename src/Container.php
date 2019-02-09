@@ -1,11 +1,13 @@
 <?php
 namespace Kanian\ContainerX;
 
-use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
-use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
 use ReflectionClass;
+use Psr\Container\ContainerInterface;
+use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
+use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
 
-class Container
+
+class Container implements ContainerInterface
 {
     /**
      * Registered dependencies
@@ -15,10 +17,10 @@ class Container
     private $instances = [];
 
     /**
-     * Undocumented function
+     * Sets a dependency.
      *
-     * @param [type] $abstract
-     * @param [type] $concrete
+     * @param string $abstract
+     * @param  $concrete
      * @return void
      */
     public function set($abstract, $concrete = null)
@@ -29,22 +31,32 @@ class Container
         $this->instances[$abstract] = $concrete;
     }
 
-    public function get($dependency, $parameters = [])
+    /**
+     * Finds an entry of the container by its identifier and returns it.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
+     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     *
+     * @return mixed Entry.
+     */
+    public function get($dependency)
     {
         if (!isset($this->instances[$dependency])) {
             throw new DependencyNotRegisteredException($dependency);
         }
-        return $this->resolve($dependency, $parameters);
+        return $this->resolve($dependency);
     }
 
-    public function resolve($dependency, $parameters = [])
+    public function resolve($dependency)
     {
-        $reflector = $this->getConstructor($dependency, $parameters);
+        $reflector = $this->getConstructor($dependency);
 
-        return $this->concretize($reflector, $parameters);
+        return $this->concretize($reflector);
 
     }
-    public function getConstructor($dependency, $parameters = [])
+    public function getConstructor($dependency)
     {
         $concrete = $this->instances[$dependency];
         $reflector = new ReflectionClass($concrete);
@@ -55,7 +67,7 @@ class Container
         // get class constructor
         return $reflector;
     }
-    public function concretize($reflector, $parameters = [])
+    public function concretize($reflector)
     {
         $constructor = $reflector->getConstructor();
         $parameters = !is_null($constructor) ? $constructor->getParameters() : [];
@@ -67,5 +79,19 @@ class Container
         // We are faced with a dependency with a constructor taking arguments
         // Hence, we resolve the dependencies of the parameters, if any.
         //$dependencies = $this->getDependencies($parameters);  
+    }
+    /**
+     * Returns true if the container can return an entry for the given identifier.
+     * Returns false otherwise.
+     *
+     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+     *
+     * @param string $id Identifier of the entry to look for.
+     *
+     * @return bool
+     */
+    public function has($id){
+        return false;
     }
 }
