@@ -43,7 +43,7 @@ class Container implements ContainerInterface
      */
     public function get($dependency)
     {
-        if (!isset($this->instances[$dependency])) {
+        if (!$this->has($dependency)) {
             throw new DependencyNotRegisteredException($dependency);
         }
         return $this->resolve($dependency);
@@ -69,13 +69,17 @@ class Container implements ContainerInterface
     }
     public function concretize($reflector)
     {
+        $resolved = [];
         $constructor = $reflector->getConstructor();
-        $parameters = !is_null($constructor) ? $constructor->getParameters() : [];
-        if (is_null($constructor) || empty($parameters)) {
+        $dependencies = !is_null($constructor) ? $constructor->getParameters() : [];
+        if (is_null($constructor) || empty($dependencies)) {
             // get new instance from class
             return $reflector->newInstance();
         }
 
+        foreach($dependencies as $dependency){
+            $resolved = $this->get($dependency);
+        }
         // We are faced with a dependency with a constructor taking arguments
         // Hence, we resolve the dependencies of the parameters, if any.
         //$dependencies = $this->getDependencies($parameters);  
@@ -92,6 +96,6 @@ class Container implements ContainerInterface
      * @return bool
      */
     public function has($id){
-        return false;
+        return isset($this->instances[$id]);
     }
 }
