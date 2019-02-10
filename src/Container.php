@@ -2,10 +2,11 @@
 namespace Kanian\ContainerX;
 
 use ReflectionClass;
+use ReflectionParameter;
 use Psr\Container\ContainerInterface;
 use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
+use Kanian\ContainerX\Exceptions\DependencyHasNoDefaultValueException;
 use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
-
 
 class Container implements ContainerInterface
 {
@@ -41,22 +42,32 @@ class Container implements ContainerInterface
      *
      * @return mixed Entry.
      */
-    public function get($dependency)
+    public function get(string $dependency)
     {
         if (!$this->has($dependency)) {
             throw new DependencyNotRegisteredException($dependency);
         }
         return $this->resolve($dependency);
     }
-
-    public function resolve($dependency)
+    /**
+     * Resolves a dependency.
+     *
+     * @param string $dependency
+     * @return the resolved entry
+     */
+    public function resolve(string $dependency)
     {
-        $reflector = $this->getConstructor($dependency);
 
+        $reflector = $this->getReflector($dependency);
         return $this->concretize($reflector);
-
     }
-    public function getConstructor($dependency)
+    /**
+     * Returns a ReflectionClass object representing the dependency's class
+     *
+     * @param string $dependency
+     * @return ReflectionClass
+     */
+    public function getReflector(string $dependency)
     {
         $concrete = $this->instances[$dependency];
         $reflector = new ReflectionClass($concrete);
@@ -67,7 +78,13 @@ class Container implements ContainerInterface
         // get class constructor
         return $reflector;
     }
-    public function concretize($reflector)
+    /**
+     * Returns an instance of the dependency.
+     *
+     * @param ReflectionClass $reflector
+     * @return any the concrete dependency.
+     */
+    public function concretize(ReflectionClass $reflector)
     {
         $resolved = [];
         $constructor = $reflector->getConstructor();
@@ -77,12 +94,26 @@ class Container implements ContainerInterface
             return $reflector->newInstance();
         }
 
-        foreach($dependencies as $dependency){
-            $resolved = $this->get($dependency);
+        foreach ($dependencies as $dependency) {
+            if ($dependency->getClass() !== null) { // The dependency is a class
+                $typeName = $dependency->getType()->__toString();
+                if (!$this->isUserDefined($dependency)) {
+
+                    $this->set($typeName);
+                }
+                $resolved[] = $this->get($typeName);
+            } else { // The dependency is a built-in primitive type
+                // check if default value for a parameter is available
+                if ($dependency->isDefaultValueAvailable()) {
+                    // get default value of parameter
+                    $resolved[] = $dependency->getDefaultValue();
+                } else {
+                    throw new DependencyHasNoDefaultValueException($dependency->name);
+                }
+            }
         }
-        // We are faced with a dependency with a constructor taking arguments
-        // Hence, we resolve the dependencies of the parameters, if any.
-        //$dependencies = $this->getDependencies($parameters);  
+        // get new instance with dependencies resolved
+        return $reflector->newInstanceArgs($resolved);
     }
     /**
      * Returns true if the container can return an entry for the given identifier.
@@ -93,9 +124,25 @@ class Container implements ContainerInterface
      *
      * @param string $id Identifier of the entry to look for.
      *
-     * @return bool
+     * @return boolean
      */
-    public function has($id){
+    public function has($id)
+    {
         return isset($this->instances[$id]);
+    }
+    /**
+     * Checks if the dependency is an internal PHP class or a user defined one
+     *
+     * @param ReflectionParameter $parameter
+     * @return boolean
+     */
+    private function isUserDefined(ReflectionParameter $parameter)
+    {
+        if ($parameter->getType()->isBuiltin()) {
+            return false;
+        }
+        $class = $parameter->getClass();
+        $isUserDefined = !$class->isInternal();
+        return $isUserDefined;
     }
 }
