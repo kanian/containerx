@@ -42,7 +42,7 @@ class Container implements ContainerInterface
      *
      * @return mixed Entry.
      */
-    public function get(string $dependency)
+    public function get($dependency)
     {
         if (!$this->has($dependency)) {
             throw new DependencyNotRegisteredException($dependency);
