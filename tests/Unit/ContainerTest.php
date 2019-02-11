@@ -7,9 +7,11 @@ use ReflectionException;
 use PHPUnit\Framework\TestCase;
 use Kanian\ContainerX\Container;
 use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
+use Kanian\ContainerX\Exceptions\DependencyClassDoesNotExistException;
 use Kanian\ContainerX\Exceptions\DependencyHasNoDefaultValueException;
 use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\ConstructorLessClass;
+use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\NonInstantiableDependency;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\DependencyWithInjectedDependencies;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\DependencyWithPrimitiveTypeDependencies;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\DependencyWithPrimitiveTypeDependenciesWithoutDefault;
@@ -23,7 +25,9 @@ class ContainerTest extends TestCase
     {
         $this->dummyDependency = new stdClass();
         $this->container = new Container;
-        $this->cantInstantiate = function () {$doNothing = 'nothing';};
+        $this->cantInstantiate = NonInstantiableDependency::class;
+        $this->factoryOne = function () {return new ConstructorLessClass;};
+        
     }
 
     public function testSetInstantialbleDependencyWithNoArgumentConstructorAndRetrieveIt()
@@ -52,6 +56,31 @@ class ContainerTest extends TestCase
         $y = new DependencyWithInjectedDependencies(new stdClass, new ConstructorLessClass);
         $this->assertEquals( $x, $y);
     }
+    public function testSetThenGetClosure()
+    {
+        $this->container->set('factoryOne',$this->factoryOne);
+        $x = $this->container->get('factoryOne');
+        $y = new ConstructorLessClass;
+        $this->assertEquals( $x, $y);
+    }
+    public function testCanExecuteClosureChain()
+    {
+        $this->container->set('factoryStd',function($c = null){
+            return new stdClass;
+        });
+        $this->container->set('factoryConstructorLess', function($c= null){
+            return new ConstructorLessClass;
+        });
+        $this->container->set('factoryComposed',function($c){
+            return new DependencyWithInjectedDependencies(
+                $c->get('factoryStd'),
+                $c->get('factoryConstructorLess')
+            );
+        });
+        $x = $this->container->get('factoryComposed');
+        $y = new DependencyWithInjectedDependencies(new stdClass, new ConstructorLessClass);
+        $this->assertEquals( $x, $y);
+    }
     public function testInstantiateDependencyWithPrimitiveTypeDependencies()
     {
         $this->container->set(DependencyWithPrimitiveTypeDependencies::class);
@@ -70,6 +99,7 @@ class ContainerTest extends TestCase
         $this->container->unset('dummyDependency');
         $this->assertTrue(!$this->container->has('dummyDependency'));
     }
+
     public function testExceptionThrownWhenDependencyNotRegistered()
     {
         $this->expectException(DependencyNotRegisteredException::class);
@@ -78,7 +108,7 @@ class ContainerTest extends TestCase
     public function testExceptionThrownWhenGettingNonexistentClass()
     {
         $this->container->set('dummyDependency', 'dummyDependency');
-        $this->expectException(ReflectionException::class);
+        $this->expectException(DependencyClassDoesNotExistException::class);
         $this->container->get('dummyDependency');
     }
     public function testExceptionThrownWhenGettingNonInstantiableDependency()

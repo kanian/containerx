@@ -1,10 +1,13 @@
 <?php
 namespace Kanian\ContainerX;
 
+use Closure;
 use ReflectionClass;
 use ReflectionParameter;
+use ReflectionException;
 use Psr\Container\ContainerInterface;
 use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
+use Kanian\ContainerX\Exceptions\DependencyClassDoesNotExistException;
 use Kanian\ContainerX\Exceptions\DependencyHasNoDefaultValueException;
 use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
 
@@ -47,46 +50,24 @@ class Container implements ContainerInterface
         if (!$this->has($dependency)) {
             throw new DependencyNotRegisteredException($dependency);
         }
-        return $this->resolve($dependency);
+        return $this->concretize($this->instances[$dependency]);
     }
     /**
-     * Resolves a dependency.
+     * Returns an instance of the entry.
      *
-     * @param string $dependency
-     * @return the resolved entry
+     * @param mixed $entry
+     * @return any the concrete entry.
      */
-    public function resolve(string $dependency)
+    protected function concretize($entry)
     {
 
-        $reflector = $this->getReflector($dependency);
-        return $this->concretize($reflector);
-    }
-    /**
-     * Returns a ReflectionClass object representing the dependency's class
-     *
-     * @param string $dependency
-     * @return ReflectionClass
-     */
-    public function getReflector(string $dependency)
-    {
-        $concrete = $this->instances[$dependency];
-        $reflector = new ReflectionClass($concrete);
-        // check if class is instantiable
-        if (!$reflector->isInstantiable()) {
-            throw new DependencyIsNotInstantiableException($dependency);
+        //We use closures in order to enable factory composition
+        if ($entry instanceof Closure) {
+            return $entry($this);
         }
-        // get class constructor
-        return $reflector;
-    }
-    /**
-     * Returns an instance of the dependency.
-     *
-     * @param ReflectionClass $reflector
-     * @return any the concrete dependency.
-     */
-    public function concretize(ReflectionClass $reflector)
-    {
+
         $resolved = [];
+        $reflector = $this->getReflector($entry);
         $constructor = $reflector->getConstructor();
         $dependencies = !is_null($constructor) ? $constructor->getParameters() : [];
         if (is_null($constructor) || empty($dependencies)) {
@@ -94,26 +75,47 @@ class Container implements ContainerInterface
             return $reflector->newInstance();
         }
 
-        foreach ($dependencies as $dependency) {
-            if ($dependency->getClass() !== null) { // The dependency is a class
-                $typeName = $dependency->getType()->__toString();
-                if (!$this->isUserDefined($dependency)) {
+        foreach ($dependencies as $parameter) {
+            if ($parameter->getClass() !== null) { // The parameter is a class
+                $typeName = $parameter->getType()->__toString();
+                if (!$this->isUserDefined($parameter)) {
 
                     $this->set($typeName);
                 }
                 $resolved[] = $this->get($typeName);
-            } else { // The dependency is a built-in primitive type
+            } else { // The parameter is a built-in primitive type
                 // check if default value for a parameter is available
-                if ($dependency->isDefaultValueAvailable()) {
+                if ($parameter->isDefaultValueAvailable()) {
                     // get default value of parameter
-                    $resolved[] = $dependency->getDefaultValue();
+                    $resolved[] = $parameter->getDefaultValue();
                 } else {
-                    throw new DependencyHasNoDefaultValueException($dependency->name);
+                    throw new DependencyHasNoDefaultValueException($parameter->name);
                 }
             }
         }
         // get new instance with dependencies resolved
         return $reflector->newInstanceArgs($resolved);
+    }
+    /**
+     * Returns a ReflectionClass object representing the entry's class
+     *
+     * @param string $entry
+     * @return ReflectionClass
+     */
+    protected function getReflector(string $entry)
+    {
+        try {
+            $reflector = new ReflectionClass($entry);
+            // check if class is instantiable
+            if (!$reflector->isInstantiable()) {
+                throw new DependencyIsNotInstantiableException($entry);
+            }
+            // get class constructor
+            return $reflector;
+        } catch (ReflectionException $ex) {
+            throw new DependencyClassDoesNotExistException($entry);
+        }
+
     }
     /**
      * Returns true if the container can return an entry for the given identifier.
@@ -130,7 +132,7 @@ class Container implements ContainerInterface
     {
         return isset($this->instances[$dependency]);
     }
-    public function unset($dependency){
+    public function unset($dependency) {
         unset($this->instances[$dependency]);
     }
     /**
