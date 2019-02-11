@@ -5,7 +5,7 @@ use ArrayAccess;
 use Kanian\ContainerX\Container;
 
 /**
- * Implements ArrayAccess to allow the use of the container 
+ * A psr-11 contaimer that implements ArrayAccess to allow the use of the container 
  * following an array metaphore.
  */
 class ContainerX extends Container implements ArrayAccess{
@@ -30,7 +30,7 @@ class ContainerX extends Container implements ArrayAccess{
     /**
      * Sets the dependency at the given offset.
      *
-     * @param [type] $offset
+     * @param string $offset
      * @param mixed $dependency
      * @return void
      */

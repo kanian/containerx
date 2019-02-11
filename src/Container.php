@@ -11,6 +11,9 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
 
+/**
+ * A psr-11 compliant container
+ */
 class Container implements ContainerInterface
 {
     /**
@@ -60,6 +63,7 @@ class Container implements ContainerInterface
     /**
      * Returns an instance of the entry.
      *
+     * @throws DependencyIsNotInstantiableException
      * @param string $entry
      * @return any the concrete entry.
      */
@@ -91,6 +95,7 @@ class Container implements ContainerInterface
     /**
      * Resolves the dependency's parameters
      *
+     * @throws DependencyHasNoDefaultValueException
      * @param ReflectionParameter $parameter
      * @return mixed a resolved parameter
      */
@@ -116,6 +121,8 @@ class Container implements ContainerInterface
     /**
      * Returns a ReflectionClass object representing the entry's class
      *
+     * @throws DependencyIsNotInstantiableException
+     * @throws DependencyClassDoesNotExistException
      * @param string $entry
      * @return ReflectionClass
      */
@@ -149,6 +156,12 @@ class Container implements ContainerInterface
     {
         return isset($this->instances[$dependency]);
     }
+    /**
+     * Removes an entry from the container
+     *
+     * @param string $dependency
+     * @return void
+     */
     function unset($dependency) {
         unset($this->instances[$dependency]);
     }
