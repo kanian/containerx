@@ -2,14 +2,14 @@
 namespace Kanian\ContainerX;
 
 use Closure;
-use ReflectionClass;
-use ReflectionParameter;
-use ReflectionException;
-use Psr\Container\ContainerInterface;
-use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
 use Kanian\ContainerX\Exceptions\DependencyClassDoesNotExistException;
 use Kanian\ContainerX\Exceptions\DependencyHasNoDefaultValueException;
 use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
+use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
+use Psr\Container\ContainerInterface;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionParameter;
 
 class Container implements ContainerInterface
 {
@@ -50,51 +50,68 @@ class Container implements ContainerInterface
         if (!$this->has($dependency)) {
             throw new DependencyNotRegisteredException($dependency);
         }
-        return $this->concretize($this->instances[$dependency]);
-    }
-    /**
-     * Returns an instance of the entry.
-     *
-     * @param mixed $entry
-     * @return any the concrete entry.
-     */
-    protected function concretize($entry)
-    {
-
+        $entry = $this->instances[$dependency];
         //We use closures in order to enable factory composition
         if ($entry instanceof Closure) {
             return $entry($this);
         }
-
+        return $this->concretize($entry);
+    }
+    /**
+     * Returns an instance of the entry.
+     *
+     * @param string $entry
+     * @return any the concrete entry.
+     */
+    public function concretize(string $entry)
+    {
         $resolved = [];
         $reflector = $this->getReflector($entry);
-        $constructor = $reflector->getConstructor();
-        $dependencies = !is_null($constructor) ? $constructor->getParameters() : [];
-        if (is_null($constructor) || empty($dependencies)) {
-            // get new instance from class
+        $constructor = null;
+        $parameters = [];
+        if ($reflector->isInstantiable()) {
+            $constructor = $reflector->getConstructor();
+            if (!is_null($constructor)) {
+                $parameters = $constructor->getParameters();
+            }
+        } else {
+            throw new DependencyIsNotInstantiableException($className);
+        }
+        if (is_null($constructor) || empty($parameters)) {
+            // return new instance from class
             return $reflector->newInstance();
         }
 
-        foreach ($dependencies as $parameter) {
-            if ($parameter->getClass() !== null) { // The parameter is a class
-                $typeName = $parameter->getType()->__toString();
-                if (!$this->isUserDefined($parameter)) {
-
-                    $this->set($typeName);
-                }
-                $resolved[] = $this->get($typeName);
-            } else { // The parameter is a built-in primitive type
-                // check if default value for a parameter is available
-                if ($parameter->isDefaultValueAvailable()) {
-                    // get default value of parameter
-                    $resolved[] = $parameter->getDefaultValue();
-                } else {
-                    throw new DependencyHasNoDefaultValueException($parameter->name);
-                }
-            }
+        foreach ($parameters as $parameter) {
+            $resolved[] = $this->resolveParameter($parameter);
         }
         // get new instance with dependencies resolved
         return $reflector->newInstanceArgs($resolved);
+    }
+    /**
+     * Resolves the dependency's parameters
+     *
+     * @param ReflectionParameter $parameter
+     * @return mixed a resolved parameter
+     */
+    public function resolveParameter(ReflectionParameter $parameter)
+    {
+        if ($parameter->getClass() !== null) { // The parameter is a class
+            $typeName = $parameter->getType()->__toString();
+            if (!$this->isUserDefined($parameter)) { //The parameter is not user defined
+
+                $this->set($typeName); // Register it
+            }
+            return $this->get($typeName); // Instantiate it
+        } else { // The parameter is a built-in primitive type
+
+            if ($parameter->isDefaultValueAvailable()) { // check if default value for a parameter is available
+
+                return $parameter->getDefaultValue(); // get default value of parameter
+            } else {
+                throw new DependencyHasNoDefaultValueException($parameter->name);
+            }
+        }
     }
     /**
      * Returns a ReflectionClass object representing the entry's class
@@ -102,7 +119,7 @@ class Container implements ContainerInterface
      * @param string $entry
      * @return ReflectionClass
      */
-    protected function getReflector(string $entry)
+    public function getReflector(string $entry)
     {
         try {
             $reflector = new ReflectionClass($entry);
@@ -132,7 +149,7 @@ class Container implements ContainerInterface
     {
         return isset($this->instances[$dependency]);
     }
-    public function unset($dependency) {
+    function unset($dependency) {
         unset($this->instances[$dependency]);
     }
     /**
@@ -141,7 +158,7 @@ class Container implements ContainerInterface
      * @param ReflectionParameter $parameter
      * @return boolean
      */
-    private function isUserDefined(ReflectionParameter $parameter)
+    public function isUserDefined(ReflectionParameter $parameter)
     {
         if ($parameter->getType()->isBuiltin()) {
             return false;
