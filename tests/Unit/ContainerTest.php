@@ -60,12 +60,21 @@ class ContainerTest extends TestCase
         $y = new DependencyWithPrimitiveTypeDependencies(3, new ConstructorLessClass);
         $this->assertEquals( $x, $y);
     }
+    public function testUnsetDependencyIsNotInContainerAnymore()
+    {
+        $this->container->set('dummyDependency', stdClass::class);
+        $this->assertEquals(
+            $this->container->get('dummyDependency'),
+            $this->dummyDependency
+        );
+        $this->container->unset('dummyDependency');
+        $this->assertTrue(!$this->container->has('dummyDependency'));
+    }
     public function testExceptionThrownWhenDependencyNotRegistered()
     {
         $this->expectException(DependencyNotRegisteredException::class);
         $this->container->get('stdClass');
     }
-
     public function testExceptionThrownWhenGettingNonexistentClass()
     {
         $this->container->set('dummyDependency', 'dummyDependency');

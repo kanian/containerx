@@ -15,7 +15,7 @@ class Container implements ContainerInterface
      *
      * @var array
      */
-    private $instances = [];
+    protected $instances = [];
 
     /**
      * Sets a dependency.
@@ -33,14 +33,14 @@ class Container implements ContainerInterface
     }
 
     /**
-     * Finds an entry of the container by its identifier and returns it.
+     * Finds a dependency by its identifier and returns it.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $dependency Identifier of the dependency to look for.
      *
-     * @throws NotFoundExceptionInterface  No entry was found for **this** identifier.
-     * @throws ContainerExceptionInterface Error while retrieving the entry.
+     * @throws NotFoundExceptionInterface  No dependency was found for **this** identifier.
+     * @throws ContainerExceptionInterface Error while retrieving the dependency.
      *
-     * @return mixed Entry.
+     * @return mixed dependency.
      */
     public function get($dependency)
     {
@@ -119,16 +119,19 @@ class Container implements ContainerInterface
      * Returns true if the container can return an entry for the given identifier.
      * Returns false otherwise.
      *
-     * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
-     * It does however mean that `get($id)` will not throw a `NotFoundExceptionInterface`.
+     * `has($dependency)` returning true does not mean that `get($dependency)` will not throw an exception.
+     * It does however mean that `get($dependency)` will not throw a `NotFoundExceptionInterface`.
      *
-     * @param string $id Identifier of the entry to look for.
+     * @param string $dependency Identifier of the entry to look for.
      *
      * @return boolean
      */
-    public function has($id)
+    public function has($dependency)
     {
-        return isset($this->instances[$id]);
+        return isset($this->instances[$dependency]);
+    }
+    public function unset($dependency){
+        unset($this->instances[$dependency]);
     }
     /**
      * Checks if the dependency is an internal PHP class or a user defined one
