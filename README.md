@@ -64,7 +64,7 @@ The container will know how to construct a Car instance for us.
 
 Alternatively, we can use:
 ## Container Functionalities Through The Array Access Interface
-For example, we can achieve factory based registration by using the **Kanian\Container\ContainerX** class, which implements the ArrayAccess interface.
+For example, we can achieve factory like functionalities by using the **Kanian\Container\ContainerX** class, which implements the ArrayAccess interface.
 
 ```php
 use Kanian\ContainerX\ContainerX;
