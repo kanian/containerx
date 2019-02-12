@@ -54,8 +54,8 @@ class Container implements ContainerInterface
             throw new DependencyNotRegisteredException($dependency);
         }
         $entry = $this->instances[$dependency];
-        //We use closures in order to enable factory composition
-        if ($entry instanceof Closure) {
+        
+        if ($entry instanceof Closure) { // We use closures in order to enable factory composition
             return $entry($this);
         }
         return $this->concretize($entry);
@@ -82,15 +82,15 @@ class Container implements ContainerInterface
             throw new DependencyIsNotInstantiableException($className);
         }
         if (is_null($constructor) || empty($parameters)) {
-            // return new instance from class
-            return $reflector->newInstance();
+            
+            return $reflector->newInstance(); // return new instance from class
         }
 
         foreach ($parameters as $parameter) {
             $resolved[] = $this->resolveParameter($parameter);
         }
-        // get new instance with dependencies resolved
-        return $reflector->newInstanceArgs($resolved);
+        
+        return $reflector->newInstanceArgs($resolved); // return new instance with dependencies resolved
     }
     /**
      * Resolves the dependency's parameters
@@ -103,16 +103,16 @@ class Container implements ContainerInterface
     {
         if ($parameter->getClass() !== null) { // The parameter is a class
             $typeName = $parameter->getType()->__toString();
-            if (!$this->isUserDefined($parameter)) { //The parameter is not user defined
+            if (!$this->isUserDefined($parameter)) { // The parameter is not user defined
 
                 $this->set($typeName); // Register it
             }
             return $this->get($typeName); // Instantiate it
         } else { // The parameter is a built-in primitive type
 
-            if ($parameter->isDefaultValueAvailable()) { // check if default value for a parameter is available
+            if ($parameter->isDefaultValueAvailable()) { // Check if default value for a parameter is available
 
-                return $parameter->getDefaultValue(); // get default value of parameter
+                return $parameter->getDefaultValue(); // Get default value of parameter
             } else {
                 throw new DependencyHasNoDefaultValueException($parameter->name);
             }
@@ -130,12 +130,12 @@ class Container implements ContainerInterface
     {
         try {
             $reflector = new ReflectionClass($entry);
-            // check if class is instantiable
-            if (!$reflector->isInstantiable()) {
+            
+            if (!$reflector->isInstantiable()) { // Check if class is instantiable
                 throw new DependencyIsNotInstantiableException($entry);
             }
-            // get class constructor
-            return $reflector;
+            
+            return $reflector; // Return class reflector
         } catch (ReflectionException $ex) {
             throw new DependencyClassDoesNotExistException($entry);
         }
