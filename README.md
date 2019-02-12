@@ -17,6 +17,10 @@ class Car {
     {
     	$this -> driver = $driver;
     }
+    public function getDriver()
+    {
+      return $this->driver;
+    }
     \\\ ... more car code
 }
 ```
@@ -34,7 +38,7 @@ Let **HumanDriver** implement:
 interface Driver {
   public function drive();
 }
-
+```
 We can use:
 ## Container functionalities as Object Methods
 In order to access the functionalities of the container as object methods:
@@ -68,6 +72,6 @@ use Kanian\ContainerX\ContainerX;
 $container = new ContainerX();
 $container['Driver'] =  HumanDriver::class;
 $container['limo'] = Car::class;
-
 $limo = $container['limo'];
+$limo->getDriver()->drive();
 ```
