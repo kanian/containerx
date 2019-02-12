@@ -29,6 +29,11 @@ class HumanDriver implements Driver {
   }
 }
 ```
+Let **HumanDriver** implement:
+```php
+interface Driver {
+  public function drive();
+}
 
 We can use:
 ## Container functionalities as Object Methods
@@ -47,7 +52,7 @@ Moreover, we could simply register the dependencies we need and let the containe
 ```php
 use Kanian\ContainerX\Container;
 $container = new Container();
-$container->set('chauffeur',HumanDriver::class);
+$container->set('Driver',HumanDriver::class);
 $container->set('limo',Car::class);
 $limo = $container->get('limo');
 ```
@@ -61,7 +66,7 @@ For example, we can achieve factory based registration by using the **Kanian\Con
 use Kanian\ContainerX\ContainerX;
 
 $container = new ContainerX();
-$container['chauffeur'] =  HumanDriver::class;
+$container['Driver'] =  HumanDriver::class;
 $container['limo'] = Car::class;
 
 $limo = $container['limo'];
