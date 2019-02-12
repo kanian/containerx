@@ -42,8 +42,8 @@ $container->set('limo', function($c){ return new Car($c->get('chauffeur'));};);
 
 $limo = $container->get('limo');
 ```
-We have used anonymous functions has factories.
-Moreover, We could simply register the dependencies we need and let the container instantiate them:
+We have used anonymous functions as factories.
+Moreover, we could simply register the dependencies we need and let the container instantiate them:
 ```php
 use Kanian\ContainerX\Container;
 $container = new Container();
@@ -54,7 +54,7 @@ $limo = $container->get('limo');
 The container will know how to construct a Car instance for us.
 
 Alternatively, we can use:
-## Container Functionalities Through The Array Access Interface
+## Container functionalities through the ArrayAccess interface
 For example, we can achieve factory based registration by using the **Kanian\Container\ContainerX** class, which implements the ArrayAccess interface.
 
 ```php
