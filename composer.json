@@ -2,10 +2,14 @@
     "name": "kanian/containerx",
     "description": "A simple PHP DI container",
     "type": "library",
-    "require": {"psr/container": "^1.0"
+    "require": {
+        "psr/container": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.0"
+    },
+    "provide": {
+        "psr/container-implementation": "^1.0"
     },
     "license": "MIT",
     "authors": [
@@ -16,12 +20,16 @@
     ],
     "autoload": {
         "psr-4": {
-            "Kanian\\ContainerX\\": ["src/"]
+            "Kanian\\ContainerX\\": [
+                "src/"
+            ]
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Kanian\\ContainerX\\Tests\\": ["tests/"]
+            "Kanian\\ContainerX\\Tests\\": [
+                "tests/"
+            ]
         }
     }
 }
