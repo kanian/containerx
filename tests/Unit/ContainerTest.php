@@ -2,20 +2,20 @@
 
 namespace Kanian\ContainerX\Tests\Unit;
 
-use stdClass;
-use ReflectionClass;
-use PHPUnit\Framework\TestCase;
 use Kanian\ContainerX\Container;
-use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
 use Kanian\ContainerX\Exceptions\DependencyClassDoesNotExistException;
 use Kanian\ContainerX\Exceptions\DependencyHasNoDefaultValueException;
 use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
-use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\ConstructorLessClass;
-use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\NonInstantiableDependency;
+use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\ClassThatMarksDateOfInstantiation;
+use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\ConstructorLessClass;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\DependencyWithInjectedDependencies;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\DependencyWithPrimitiveTypeDependencies;
 use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\DependencyWithPrimitiveTypeDependenciesWithoutDefault;
+use Kanian\ContainerX\Tests\Unit\RepresentativeDependencies\NonInstantiableDependency;
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use stdClass;
 
 class ContainerTest extends TestCase
 {
@@ -28,17 +28,18 @@ class ContainerTest extends TestCase
         $this->container = new Container;
         $this->cantInstantiate = NonInstantiableDependency::class;
         $this->factoryOne = function () {return new ConstructorLessClass;};
-        $this->factoryOfDobClass = function($container){
+        $this->factoryOfDobClass = function ($container) {
             return new ClassThatMarksDateOfInstantiation;
         };
 
     }
 
-    public function testSingletonize(){
-        $this->container->singletonize('DobLcass',$this->factoryOfDobClass);
+    public function testSingletonize()
+    {
+        $this->container->singletonize('DobLcass', $this->factoryOfDobClass);
         $dob = $this->container->get('DobLcass');
         $dob2 = $this->container->get('DobLcass');
-        $this->assertEquals($dob,$dob2);
+        $this->assertEquals($dob, $dob2);
     }
 
     public function testSetInstantialbleDependencyWithNoArgumentConstructorAndRetrieveIt()
@@ -165,6 +166,7 @@ class ContainerTest extends TestCase
             $this->container->isUserDefined($parameters[1]) // ConstructorLessClass
         );
     }
+
     public function testExceptionThrownWhenDependencyNotRegistered()
     {
         $this->expectException(DependencyNotRegisteredException::class);
@@ -188,5 +190,5 @@ class ContainerTest extends TestCase
         $this->expectException(DependencyHasNoDefaultValueException::class);
         $this->container->get(DependencyWithPrimitiveTypeDependenciesWithoutDefault::class);
     }
-   
+
 }
