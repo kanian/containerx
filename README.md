@@ -33,9 +33,9 @@ class HumanDriver implements Driver {
   }
 }
 ```
-Let **HumanDriver** implement interface **Driver**:
+Let **HumanDriver** implement:
 ```php
-interface Driver{
+interface Driver {
   public function drive();
 }
 ```
@@ -51,8 +51,8 @@ $container->set('limo', function($c){ return new Car($c->get('chauffeur'));};);
 
 $limo = $container->get('limo');
 ```
-We have used anonymous functions has factories.
-Moreover, We could simply register the dependencies we need and let the container instantiate them:
+We have used anonymous functions as factories.
+Moreover, we could simply register the dependencies we need and let the container instantiate them:
 ```php
 use Kanian\ContainerX\Container;
 $container = new Container();

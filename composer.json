@@ -1,6 +1,7 @@
 {
     "name": "kanian/containerx",
     "description": "A simple PHP DI container",
+    "keywords": ["DI Container","PHP"],
     "type": "library",
     "require": {
         "psr/container": "^1.0"
@@ -15,7 +16,8 @@
     "authors": [
         {
             "name": "Patrick Assoa",
-            "email": "kanian77@gmail.com"
+            "email": "kanian77@gmail.com",
+            "role": "Software Architect"
         }
     ],
     "autoload": {
