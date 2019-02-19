@@ -1,6 +1,6 @@
 # ContainerX
 
-ContainerX is a little PHP dependency injection container.
+ContainerX is a little PHP dependency injection container. It's intended to be small enough that you could look at its code source to understand what is going on.
 
 # Installation
 ```bash
