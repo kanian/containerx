@@ -54,7 +54,7 @@ class Container implements ContainerInterface
             throw new DependencyNotRegisteredException($dependency);
         }
         $entry = $this->instances[$dependency];
-        
+
         if ($entry instanceof Closure) { // We use closures in order to enable factory composition
             return $entry($this);
         }
@@ -82,14 +82,14 @@ class Container implements ContainerInterface
             throw new DependencyIsNotInstantiableException($className);
         }
         if (is_null($constructor) || empty($parameters)) {
-            
+
             return $reflector->newInstance(); // return new instance from class
         }
 
         foreach ($parameters as $parameter) {
             $resolved[] = $this->resolveParameter($parameter);
         }
-        
+
         return $reflector->newInstanceArgs($resolved); // return new instance with dependencies resolved
     }
     /**
@@ -130,11 +130,11 @@ class Container implements ContainerInterface
     {
         try {
             $reflector = new ReflectionClass($entry);
-            
+
             if (!$reflector->isInstantiable()) { // Check if class is instantiable
                 throw new DependencyIsNotInstantiableException($entry);
             }
-            
+
             return $reflector; // Return class reflector
         } catch (ReflectionException $ex) {
             throw new DependencyClassDoesNotExistException($entry);
@@ -191,12 +191,7 @@ class Container implements ContainerInterface
             public function __construct($func = null, $c = null)
             {
                 if (self::$instance === null) {
-                    if($func instanceof Closure){
-                        self::$instance = $func($c);
-                    } else {
-                        //throw error
-                    }
-                    
+                    self::$instance = $func($c);
                 }
                 return self::$instance;
             }
