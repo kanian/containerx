@@ -7,7 +7,7 @@ use Psr\Container\ContainerExceptionInterface;
 class DependencyClassDoesNotExistException extends Exception implements ContainerExceptionInterface{
     public function __construct($dependency, $code = 0, Exception $previous = null)
     {
-        $message = "Class {$dependency} does not exist";
+        $message = "{$dependency} does not exist";
         parent::__construct($message, $code, $previous);
     }
 }
