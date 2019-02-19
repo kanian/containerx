@@ -1,6 +1,6 @@
 # ContainerX
 
-ContainerX is a little PHP dependency injection container.
+ContainerX is a little PHP dependency injection container. It's intended to be small enough that you could look at its code source to understand what is going on.
 
 # Installation
 ```bash
@@ -17,10 +17,6 @@ class Car {
     {
     	$this -> driver = $driver;
     }
-    public function getDriver()
-    {
-      return $this->driver;
-    }
     \\\ ... more car code
 }
 ```
@@ -33,45 +29,56 @@ class HumanDriver implements Driver {
   }
 }
 ```
-Let **HumanDriver** implement:
-```php
-interface Driver {
-  public function drive();
-}
-```
+
 We can use:
-## Container functionalities as Object Methods
+## Container functionalities as object methods
 In order to access the functionalities of the container as object methods:
 ```php
 use Kanian\ContainerX\Container;
 
 $container = new Container();
 $container->set('chauffeur', function($c){ return new HumanDriver;});
-$container->set('limo', function($c){ return new Car($c->get('chauffeur'));};);
+$container->set('limo', function($c){ return new Car($c->get('chauffeur'));});
 
 $limo = $container->get('limo');
 ```
-We have used anonymous functions as factories.
-Moreover, we could simply register the dependencies we need and let the container instantiate them:
+We have used anonymous functions has factories.
+Moreover, We could simply register the dependencies we need and let the container instantiate them:
 ```php
 use Kanian\ContainerX\Container;
 $container = new Container();
-$container->set('Driver',HumanDriver::class);
+$container->set('chauffeur',HumanDriver::class);
 $container->set('limo',Car::class);
 $limo = $container->get('limo');
 ```
 The container will know how to construct a Car instance for us.
 
 Alternatively, we can use:
-## Container Functionalities Through The Array Access Interface
-For example, we can achieve factory like functionalities by using the **Kanian\Container\ContainerX** class, which implements the ArrayAccess interface.
+## Container functionalities through the ArrayAccess Interface
+For example, we can achieve factory based registration by using the **Kanian\Container\ContainerX** class, which implements the ArrayAccess interface.
 
 ```php
 use Kanian\ContainerX\ContainerX;
 
 $container = new ContainerX();
-$container['Driver'] =  HumanDriver::class;
+$container['chauffeur'] =  HumanDriver::class;
 $container['limo'] = Car::class;
+
 $limo = $container['limo'];
-$limo->getDriver()->drive();
 ```
+
+# Accessing a dependency as a Singleton
+In order to ensure that there is receive only one copy of a dependency in the system at a time, you will use the 
+```php 
+singletonize
+``` 
+method. like this:
+```php 
+$factoryOfLimo = function ($container) {
+            return new Car($container['chauffeur']);
+        };
+$container->singletonize('limo', $factoryOfLimo);
+$limo = $container['limo'];
+``` 
+Now you will always get the same instance of Car, but with different instances of HumanDriver.
+You will have noticed that a closure is used instead of just the class name as in previous examples. In fact, singletonize only accepts closures. 
