@@ -180,4 +180,34 @@ class Container implements ContainerInterface
         $isUserDefined = !$class->isInternal();
         return $isUserDefined;
     }
+
+    public function singletonize($dependencyKey, \Closure $func)
+    {
+        $singled = new class($func, $this)
+        {
+            // Hold the class instance.
+            private static $instance = null;
+
+            public function __construct($func = null, $c = null)
+            {
+                if (self::$instance === null) {
+                    if($func instanceof Closure){
+                        self::$instance = $func($c);
+                    } else {
+                        //throw error
+                    }
+                    
+                }
+                return self::$instance;
+            }
+            // The singleton decorates the original closure
+            public function __call($method, $args)
+            {
+                return call_user_func_array([self::$instance, $method], $args);
+
+            }
+        };
+        $this->set($dependencyKey, get_class($singled));
+        //return $o;
+    }
 }
