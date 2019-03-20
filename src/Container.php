@@ -189,7 +189,7 @@ class Container implements ContainerInterface
 
     public function singletonize($dependencyKey, $className)
     {
-        $singletonClass = SingletonFactory::get(new $className);
+        $singletonClass = SingletonFactory::get($className);
 
         $this->set($dependencyKey, $singletonClass);
     }
