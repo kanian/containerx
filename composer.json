@@ -4,7 +4,8 @@
     "keywords": ["DI Container","PHP"],
     "type": "library",
     "require": {
-        "psr/container": "^1.0"
+        "psr/container": "^1.0",
+        "kanian/patterns": "^1.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.0"

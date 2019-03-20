@@ -36,7 +36,7 @@ class ContainerTest extends TestCase
 
     public function testSingletonize()
     {
-        $this->container->singletonize('DobLcass', $this->factoryOfDobClass);
+        $this->container->singletonize('DobLcass', ClassThatMarksDateOfInstantiation::class);
         $dob = $this->container->get('DobLcass');
         $dob2 = $this->container->get('DobLcass');
         $this->assertEquals($dob, $dob2);

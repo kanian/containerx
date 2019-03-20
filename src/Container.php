@@ -1,11 +1,13 @@
 <?php
 namespace Kanian\ContainerX;
 
+use Assoa\PatternFactories\SingletonFactory;
 use Closure;
 use Kanian\ContainerX\Exceptions\DependencyClassDoesNotExistException;
 use Kanian\ContainerX\Exceptions\DependencyHasNoDefaultValueException;
 use Kanian\ContainerX\Exceptions\DependencyIsNotInstantiableException;
 use Kanian\ContainerX\Exceptions\DependencyNotRegisteredException;
+use Kanian\ContainerX\Loader\Loader;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionException;
@@ -16,6 +18,10 @@ use ReflectionParameter;
  */
 class Container implements ContainerInterface
 {
+    public function __construct()
+    {
+        Loader::getLoader();
+    }
     /**
      * Registered dependencies
      *
@@ -181,28 +187,10 @@ class Container implements ContainerInterface
         return $isUserDefined;
     }
 
-    public function singletonize($dependencyKey, \Closure $func)
+    public function singletonize($dependencyKey, $className)
     {
-        $singled = new class($func, $this)
-        {
-            // Hold the class instance.
-            private static $instance = null;
+        $singletonClass = SingletonFactory::get(new $className);
 
-            public function __construct($func = null, $c = null)
-            {
-                if (self::$instance === null) {
-                    self::$instance = $func($c);
-                }
-                return self::$instance;
-            }
-            // The singleton decorates the original closure
-            public function __call($method, $args)
-            {
-                return call_user_func_array([self::$instance, $method], $args);
-
-            }
-        };
-        $this->set($dependencyKey, get_class($singled));
-        //return $o;
+        $this->set($dependencyKey, $singletonClass);
     }
 }

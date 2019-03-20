@@ -4,8 +4,94 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6022a706c268d45d81fc27709c63b09b",
+    "content-hash": "efb1a51a84ba59fd3b0b98194f8b3df0",
     "packages": [
+        {
+            "name": "kanian/patterns",
+            "version": "1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kanian/patterns.git",
+                "reference": "36a1f1cd50afd7127aac1e65a9c8cf208eb2ab02"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kanian/patterns/zipball/36a1f1cd50afd7127aac1e65a9c8cf208eb2ab02",
+                "reference": "36a1f1cd50afd7127aac1e65a9c8cf208eb2ab02",
+                "shasum": ""
+            },
+            "require": {
+                "nikic/php-parser": "^4.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Assoa\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Patrick Assoa",
+                    "email": "kanian77@gmail.com"
+                }
+            ],
+            "time": "2019-03-20T13:19:07+00:00"
+        },
+        {
+            "name": "nikic/php-parser",
+            "version": "v4.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "5221f49a608808c1e4d436df32884cbc1b821ac0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/5221f49a608808c1e4d436df32884cbc1b821ac0",
+                "reference": "5221f49a608808c1e4d436df32884cbc1b821ac0",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.5 || ^7.0"
+            },
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "time": "2019-02-16T20:54:15+00:00"
+        },
         {
             "name": "psr/container",
             "version": "1.0.0",
