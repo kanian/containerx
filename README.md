@@ -1,6 +1,6 @@
 # ContainerX
 
-ContainerX is a little PHP dependency injection container. It's intended to be small enough that you could look at its code source to understand what is going on.
+ContainerX is a little PHP dependency injection container.
 
 # Installation
 ```bash
@@ -74,11 +74,7 @@ singletonize
 ``` 
 method. like this:
 ```php 
-$factoryOfLimo = function ($container) {
-            return new Car($container['chauffeur']);
-        };
-$container->singletonize('limo', $factoryOfLimo);
+$container->singletonize('limo', Car::class);
 $limo = $container['limo'];
 ``` 
-Now you will always get the same instance of Car, but with different instances of HumanDriver.
-You will have noticed that a closure is used instead of just the class name as in previous examples. In fact, singletonize only accepts closures. 
+Now you will always get the same instance of Car, but with different instances of HumanDriver.. 
